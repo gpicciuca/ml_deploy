@@ -1,0 +1,5 @@
+services:
+  # Override parameters of this service
+  model_runner:
+    # Sets the entrypoint so that pytest is executed
+    entrypoint: ["pytest"]

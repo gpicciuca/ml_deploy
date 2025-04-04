@@ -1,0 +1,33 @@
+# This job will sync our model_runner implementation to HuggingFace Spaces,
+# effectively automating the deployment of the software.
+# HuggingFace will then auto-generate a docker image through which the app
+# will be available online.
+
+name: Sync to Hugging Face hub
+
+on:
+  # Trigger this job only when commits are merged onto the main branch
+  push:
+    branches: [main]
+
+  # Just in case we want to run this manually
+  workflow_dispatch:
+
+jobs:
+  # Job Name
+  sync-to-hub:
+	# Basic config to run the job
+    runs-on: ubuntu-latest
+    steps:
+	  # Checkout the repo first
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          lfs: false
+	
+	  # Run a git command to push a subtree (./model_runner) of our repo over to HuggingFace
+	  # This will make sure that only the model_runner app will be deployed over there
+      - name: Push model_runner to hub
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        run: git subtree push --prefix model_runner https://gpicciuca:@huggingface.co/spaces/gpicciuca/ml_deploy main

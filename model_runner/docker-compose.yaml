@@ -1,0 +1,25 @@
+services:
+  # 
+  model_runner:
+    build: 
+      context: .
+      dockerfile: Dockerfile
+
+    environment:
+      - APP_LISTEN_PORT=${APP_LISTEN_PORT}
+      - MLFLOW_ENDPOINT=${MLFLOW_ENDPOINT}
+      - HF_ACCESS_TOKEN=${HF_ACCESS_TOKEN}
+
+    container_name: mlrunner
+    restart: on-failure
+    ports:
+      - "${APP_LISTEN_PORT}:${APP_LISTEN_PORT}"
+    volumes:
+      - "./app:/app"
+    entrypoint: ["/usr/bin/python3", "/app/main.py"]
+    networks:
+      - airflow_tracking_network
+
+networks:
+  airflow_tracking_network:
+    external: true

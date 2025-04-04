@@ -1,0 +1,36 @@
+# This Job will run some simple infrastructure tests via python to make sure that
+# the endpoints implementations work as intended.
+
+name: Start testing of training/inferencing infrastructure
+
+on:
+  # Triggered only in PRs
+  pull_request:
+    branches: [ "main" ]
+
+  # Allows to manually run this job
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Docker Image
+        working-directory: ./model_runner
+        run: docker compose -f docker-compose.yaml -f docker-compose.test.yaml build
+
+      - name: Run tests inside docker
+        working-directory: ./model_runner
+        run: docker compose -f docker-compose.yaml -f docker-compose.test.yaml run --rm model_runner
+
+      - name: Clean up docker containers
+        if: always()
+        working-directory: ./model_runner
+        run: docker compose -f docker-compose.yaml -f docker-compose.test.yaml down
