@@ -8,7 +8,7 @@ import time
 from scipy.special import softmax
 
 # HuggingFace Model to be used for inferencing
-MODEL = "gpicciuca/twitter-roberta-base-sentiment-latest"
+MODEL = "gpicciuca/sentiment_trainer"
 # MODEL = "cardiffnlp/twitter-roberta-base-sentiment-latest"
 
 class InferenceTask:
@@ -37,7 +37,7 @@ class InferenceTask:
 			self.__model = AutoModelForSequenceClassification.from_pretrained(MODEL)
 			self.__is_loaded = True
 		except Exception as ex:
-			logger.error("Failed to load inference model: {ex}")
+			logger.error(f"Failed to load inference model: {ex}")
 			self.clear()
 			return False
 

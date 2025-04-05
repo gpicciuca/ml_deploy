@@ -1,6 +1,6 @@
 # Company's sentiment analysis on social medias
 
-This project implements an automated CI/CD Pipeline to integrate and deploy a sentiment analysis LLM from HuggingFace to continuosly evaluated a company's sentiment throughout social media posts.
+This project implements an automated CI/CD Pipeline to integrate and deploy a sentiment analysis LLM from HuggingFace to continuosly evaluate a company's sentiment throughout social media posts.
 
 ## Components
 The application is composed mainly of 2 parts:

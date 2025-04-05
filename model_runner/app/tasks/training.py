@@ -20,9 +20,9 @@ import time
 
 
 # MODEL = "cardiffnlp/twitter-roberta-base-sentiment-latest"
-MODEL = "gpicciuca/twitter-roberta-base-sentiment-latest"
 DATASET = "zeroshot/twitter-financial-news-sentiment"
-HF_DEST_REPO = "financial-twitter-roberta-sentiment"
+MODEL = "gpicciuca/sentiment_trainer"
+HF_REPO = "gpicciuca/sentiment_trainer"
 
 RNG_SEED = 22
 
@@ -162,8 +162,8 @@ class TrainingTask:
 		self.__test_dataset = dataset_train_test["test"]
 
 		# Swap labels so that they match what the model actually expects
-		# The model expects {0: positive, 1: neutral, 2: negative}
-		# But the dataset uses {0: positive, 1: negative, 2: neutral}
+		# The model expects {0: negative, 1: neutral, 2: positive}
+		# But the dataset uses {0: negative, 1: positive, 2: neutral}
 		# So here we just flip 1<->2 to remain consistent
 		def label_filter(row):
 			row["label"] = { 0: 0, 1: 2, 2: 1 }[row["label"]]
@@ -204,8 +204,8 @@ class TrainingTask:
 		Loads the model from the repository
 		"""
 		# Set the mapping between int label and its meaning.
-		id2label = {0: "Bearish", 1: "Neutral", 2: "Bullish"}
-		label2id = {"Bearish": 0, "Neutral": 1, "Bullish": 2}
+		id2label = {0: "negative", 1: "neutral", 2: "positive"}
+		label2id = {"negative": 0, "neutral": 1, "positive": 2}
 
 		# Acquire the model from the Hugging Face Hub, providing label and id mappings so that both we and the model can 'speak' the same language.
 		self.__model = AutoModelForSequenceClassification.from_pretrained(
@@ -251,7 +251,7 @@ class TrainingTask:
 			return metric.compute(predictions=predictions, references=labels)
 
 		# Checkpoints will be output to this `training_output_dir`.
-		training_output_dir = "./training_output"
+		training_output_dir = "/tmp/sentiment_trainer"
 		training_args = TrainingArguments(
 			output_dir=training_output_dir,
 			eval_strategy="epoch",
@@ -310,10 +310,13 @@ class TrainingTask:
 		"""
 		Uploads the fine-tuned model to HuggingFace
 		"""
-		self.__trainer.push_to_hub(HF_DEST_REPO)
+		logger.info("Deploying Model and Tokenizer to HuggingFace")
+		self.__trainer.push_to_hub(HF_REPO)
+		self.__tokenizer.push_to_hub(HF_REPO)
 
 	def __reload_inference_model(self):
 		"""
 		Reloads the model used by the Inference class.
 		"""
+		logger.info("Reloading inference model")
 		infer_task.load_model()
