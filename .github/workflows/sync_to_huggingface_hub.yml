@@ -25,9 +25,14 @@ jobs:
           fetch-depth: 0
           lfs: false
 
+      - name: Add remote 
+        env:
+          HF_TOKEN: ${{ secrets.HF_ACCESS_TOKEN }}
+        run: git remote add space https://gpicciuca:$HF_TOKEN@huggingface.co/spaces/gpicciuca/ml_deploy
+
       # Run a git command to push a subtree (./model_runner) of our repo over to HuggingFace
       # This will make sure that only the model_runner app will be deployed over there
       - name: Push model_runner to hub
         env:
           HF_TOKEN: ${{ secrets.HF_ACCESS_TOKEN }}
-        run: git subtree push --force --prefix model_runner https://gpicciuca:$HF_TOKEN@huggingface.co/spaces/gpicciuca/ml_deploy main
+        run: git push --force https://gpicciuca:$HF_TOKEN@huggingface.co/spaces/gpicciuca/ml_deploy `git subtree split --prefix model_runner main`:main
