@@ -1,5 +1,4 @@
 services:
-  # 
   model_runner:
     build: 
       context: .
@@ -19,6 +18,13 @@ services:
     entrypoint: ["/usr/bin/python3", "/app/main.py"]
     networks:
       - airflow_tracking_network
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
 
 networks:
   airflow_tracking_network:

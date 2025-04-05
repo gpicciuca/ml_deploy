@@ -16,17 +16,17 @@ on:
 jobs:
   # Job Name
   sync-to-hub:
-	# Basic config to run the job
+    # Basic config to run the job
     runs-on: ubuntu-latest
     steps:
-	  # Checkout the repo first
+      # Checkout the repo first
       - uses: actions/checkout@v3
         with:
           fetch-depth: 0
           lfs: false
-	
-	  # Run a git command to push a subtree (./model_runner) of our repo over to HuggingFace
-	  # This will make sure that only the model_runner app will be deployed over there
+
+      # Run a git command to push a subtree (./model_runner) of our repo over to HuggingFace
+      # This will make sure that only the model_runner app will be deployed over there
       - name: Push model_runner to hub
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}

@@ -35,15 +35,13 @@ ModelRunner uses FastAPI and Uvicorn to host a self-contained Training and Infer
 
 When Airflow sends a training request, ModelRunner receives it and schedules a training right away, unless one is already running. In either case, it will give direct feedback whether the request was fulfilled or discarded by returning appropriate responses.
 
-```
-Note: In `model_runner/app/tasks/training.py` you will find that the `MODEL` being used to train on is `cardiffnlp/twitter-roberta-base-sentiment-latest`, which is then pushed to `gpicciuca/financial-twitter-roberta-sentiment` after training. However, for simplicity, in the `inferece.py` file the same original model is being reused instead of the trained one but in production, it should always fetch the model that we've trained and pushed to our own repository!
-```
-
 Training may take a long time, depending on the server performance on which the application is deployed on.
 For this reason, a "get_state" endpoint was added so that Airflow can poll it at regular intervals to see if the training is still ongoing, if it has finished or if it ended with an error.
 
 Once the training completes successfully, the updated model is pushed to HuggingFace and the Inference class reloads it to keep things up-to-date.
+```
 For simplicity, it pulls the model from HuggingFace but a more efficient way would be to directly re-use the trained model at that point in time.
+```
 
 ## CI/CD Pipeline
 The Pipeline makes use of Github Actions which takes care of the following:
@@ -65,21 +63,11 @@ Resources used for this Project:
 - https://huggingface.co/docs/hub/spaces-sdks-docker-examples
 - https://huggingface.co/spaces/SpacesExamples/fastapi_dummy/tree/main
 - https://mlflow.org/docs/latest/tracking/tutorials/remote-server/
+- https://stackoverflow.com/questions/75118992/docker-error-response-from-daemon-could-not-select-device-driver-with-capab
+- https://huggingface.co/docs/transformers/en//training
+- https://mlflow.org/docs/latest/llms/transformers/tutorials/fine-tuning/transformers-fine-tuning
 
 #
 
 ## Final thoughts
 This is the final project I've made in scope of [Profession.AI's AI Engineering](https://profession.ai/corsi/master-ai-engineering/) course, module 5 "MLOps and Machine Learning in production".
-
-
-curl -X POST '${{ secrets.AF_HOST }}/api/v1/dags/${{ secrets.AF_DAG_ML_TRAIN }}/dagRuns' -H 'Content-Type: application/json' --user "${{ secrets.AF_USER }}:${{ secrets.AF_USER_TOKEN }}" -d '{}'
-
-
-curl -X PATCH '${{ secrets.AF_HOST }}/api/v1/dags/${{ secrets.AF_DAG_ML_TRAIN }}?update_mask=is_paused' -H 'Content-Type: application/json' --user "${{ secrets.AF_USER }}:${{ secrets.AF_USER_TOKEN }}" -d '{ "is_paused": false }'
-
-
-curl -X 'POST' -H 'Content-Type: application/json' http://localhost:9000/inference -d '{"messages":["1", "2"]}'
-
-
-curl -X 'PATCH' -H 'Content-Type: application/json' http://localhost:9000/inference -d '{"messages":["1", "2"]}'
-

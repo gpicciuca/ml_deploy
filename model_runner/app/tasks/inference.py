@@ -8,15 +8,29 @@ import time
 from scipy.special import softmax
 
 # HuggingFace Model to be used for inferencing
-MODEL = f"cardiffnlp/twitter-roberta-base-sentiment-latest"
+MODEL = "gpicciuca/twitter-roberta-base-sentiment-latest"
+# MODEL = "cardiffnlp/twitter-roberta-base-sentiment-latest"
 
 class InferenceTask:
+
+	"""
+	This class encapsulates the entire inferencing logic by using HuggingFace's Transformers library.
+	It offers a convenient "predict()" method that returns a list of dictionaries, where each
+	dictionary contains the sentiment analysis for each message that has been evaluated.
+	"""
 
 	def __init__(self):
 		self.clear()
 		self.load_model()
 
 	def load_model(self):
+		"""
+		Loads the classification model, its configuration and the tokenizer required for pre-processing
+		any text that needs to be inferenced later on.
+
+		Returns:
+			bool: True if loading succeeded, false otherwise
+		"""
 		try:
 			self.__tokenizer = AutoTokenizer.from_pretrained(MODEL)
 			self.__config = AutoConfig.from_pretrained(MODEL)
@@ -30,15 +44,37 @@ class InferenceTask:
 		return True
 
 	def clear(self):
+		"""
+		Resets the state of this instance
+		"""
 		self.__is_loaded = False
 		self.__tokenizer = None
 		self.__config = None
 		self.__model = None
 
 	def is_loaded(self):
+		"""
+		Checks if the class is ready and can be used, depending on whether 
+  		a model has been loaded.
+
+		Returns:
+			bool: True if model was loaded, false otherwise
+		"""
 		return self.__is_loaded
 
 	def predict(self, messages: list[str]):
+		"""
+		Method taking a list of messages to perform the sentiment classification on.
+		Each inference run is logged in MLFlow under the experiment 'Sentiment Analysis'.
+		For efficiency, only the average of the whole bulk request is logged.
+
+		Args:
+			messages (list[str]): List of messages to classify
+
+		Returns:
+			list[dict]: A list of dictionaries where each element contains the probabilities
+						for 'positive', 'neutral' and 'negative' sentiment.
+		"""
 		if len(messages) == 0:
 			return None
 
@@ -69,6 +105,15 @@ class InferenceTask:
 			return labelized_scores
 
 	def __calculate_mean_sentiment(self, labelized_scores: list):
+		"""
+		Calculates the average sentiment over a list of classified messages.
+
+		Args:
+			labelized_scores (list): List of labelled scores resulting from the prediction step.
+
+		Returns:
+			dict: Dictionary with average values for for 'positive', 'neutral' and 'negative'.
+		"""
 		total_samples = float(len(labelized_scores))
 
 		mean_sentiment = {
@@ -88,8 +133,17 @@ class InferenceTask:
 
 		return mean_sentiment
 
-	# Preprocess text (username and link placeholders)
 	def __preprocess(self, messages: list[str]):
+		"""
+		Preprocesses the messages to remove certain patterns that are not
+		required for inferencing. User tags and http links are stripped out.
+
+		Args:
+			messages (list[str]): List of messages to preprocess
+
+		Returns:
+			list[str]: List of processed messages without user tags and links
+		"""
 		msg_list = []
 		for message in messages:
 			new_message = []
@@ -101,6 +155,17 @@ class InferenceTask:
 		return msg_list
 
 	def __labelize(self, scores):
+		"""
+		Helper method to transform numpy labels, coming as a result of the classification,
+		back into their equivalent textual version so that they are human-readable by using
+		the model's configuration.
+
+		Args:
+			scores: Result from prediction for each individual message
+
+		Returns:
+			dict: Dictionary containing the sentiment prediction with human-readable labels
+		"""
 		output = {}
 		ranking = np.argsort(scores)
 		ranking = ranking[::-1]
