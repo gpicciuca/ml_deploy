@@ -72,7 +72,9 @@ class InferenceRequest(BaseModel):
 @app.post("/inference", response_class=JSONResponse)
 async def inference(data: InferenceRequest):
 	"""
-	
+	Endpoint on which you can send a list of messages that need to be
+	classified. A list of predictions will be returned in response,
+	containing for each message all of the probabilities for each label.
 
 	Args:
 		data (InferenceRequest): Structure containing a list of 
