@@ -29,5 +29,5 @@ jobs:
       # This will make sure that only the model_runner app will be deployed over there
       - name: Push model_runner to hub
         env:
-          HF_TOKEN: ${{ secrets.HF_TOKEN }}
-        run: git subtree push --prefix model_runner https://gpicciuca:@huggingface.co/spaces/gpicciuca/ml_deploy main
+          HF_TOKEN: ${{ secrets.HF_ACCESS_TOKEN }}
+        run: git subtree push --prefix model_runner https://gpicciuca:$HF_TOKEN@huggingface.co/spaces/gpicciuca/ml_deploy main
