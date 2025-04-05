@@ -30,4 +30,4 @@ jobs:
       - name: Push model_runner to hub
         env:
           HF_TOKEN: ${{ secrets.HF_ACCESS_TOKEN }}
-        run: git subtree push --prefix model_runner https://gpicciuca:$HF_TOKEN@huggingface.co/spaces/gpicciuca/ml_deploy main
+        run: git subtree push --force --prefix model_runner https://gpicciuca:$HF_TOKEN@huggingface.co/spaces/gpicciuca/ml_deploy main
